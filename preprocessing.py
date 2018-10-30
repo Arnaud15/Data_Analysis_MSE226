@@ -1,41 +1,37 @@
 import pandas as pd
 import numpy as np
-import seaborn as sb
-import matplotlib.pyplot as plt
 
 pd.set_option('display.expand_frame_repr', False)
 
 
-def load_csv_save_binary():
-    geo = pd.read_csv('./data/geolocation_olist_public_dataset.csv')
-    main = pd.read_csv('./data/olist_public_dataset_v2.csv')
-    custom = pd.read_csv('./data/olist_public_dataset_v2_customers.csv')
-    payments = pd.read_csv('./data/olist_public_dataset_v2_payments.csv')
-    labeled = pd.read_csv('./data/olist_classified_public_dataset.csv')
-    measures = pd.read_csv('./data/product_measures_olist_public_dataset_.csv')
-    sellers = pd.read_csv('./data/sellers_olist_public_dataset_.csv')
-    geo.to_pickle("./data/geolocation.pkl")
-    main.to_pickle("./data/main_olist.pkl")
-    custom.to_pickle("./data/customers.pkl")
-    payments.to_pickle("./data/payments.pkl")
-    labeled.to_pickle("./data/classified_olis.pkl")
-    measures.to_pickle("./data/product_measures.pkl")
-    sellers.to_pickle("./data/sellers.pkl")
+def load_csv_save_binary(data_names):
+    csv = '.csv'
+    direc = './data/'
+    pkl = '.pkl'
+    for name in data_names:
+        csv_file = pd.read_csv(direc + name + csv)
+        csv_file.to_pickle(direc + name + pkl)
 
 
-def load_binary():
-    geo = pd.read_pickle("./data/geolocation.pkl")
-    main = pd.read_pickle("./data/main_olist.pkl")
-    custom = pd.read_pickle("./data/customers.pkl")
-    payments = pd.read_pickle("./data/payments.pkl")
-    labeled = pd.read_pickle("./data/classified_olis.pkl")
-    measures = pd.read_pickle("./data/product_measures.pkl")
-    sellers = pd.read_pickle("./data/sellers.pkl")
-    return main, labeled, payments, custom, geo, measures, sellers
+def load_binary(data_names):
+    direc = './data/'
+    pkl = '.pkl'
+    res = []
+    for name in data_names:
+        res.append(pd.read_pickle(direc + name + pkl))
+    return res
+
+
+def train_test_split(data, train_size=0.8):
+    msk = np.random.rand(len(data)) < train_size
+    return data[msk], data[~msk]
 
 
 def cleaning():
-    main, labeled, payments, custom, geo, measures, sellers = load_binary()
+    data_names = ['geolocation_olist_public_dataset', 'olist_public_dataset_v2', 'olist_public_dataset_v2_customers',
+                  'payments_olist_public_dataset', 'olist_classified_public_dataset',
+                  'product_measures_olist_public_dataset_', 'sellers_olist_public_dataset_']
+    [geo, main, custom, payments, labeled, measures, sellers] = load_binary(data_names)
 
     # Get one pair of coordinates for each zip code
     geo = geo.loc[:, ['zip_code_prefix', 'lat', 'lng']].groupby('zip_code_prefix').mean()
@@ -56,10 +52,13 @@ def cleaning():
     approval_time = (main.loc[:, 'order_aproved_at'] - main.loc[:, 'order_purchase_timestamp']).astype('timedelta64[s]')
     main = main.assign(approval_time=approval_time)
 
-    delivery_delay = (main.loc[:, 'order_delivered_customer_date'] - main.loc[:, 'order_estimated_delivery_date']).astype('timedelta64[s]')
+    delivery_delay = (
+                main.loc[:, 'order_delivered_customer_date'] - main.loc[:, 'order_estimated_delivery_date']).astype(
+        'timedelta64[s]')
     main = main.assign(delivery_delay=delivery_delay)
 
-    review_time = (main.loc[:, 'review_answer_timestamp'] - main.loc[:, 'review_creation_date']).astype('timedelta64[s]')
+    review_time = (main.loc[:, 'review_answer_timestamp'] - main.loc[:, 'review_creation_date']).astype(
+        'timedelta64[s]')
     main = main.assign(review_time=review_time)
 
     # Deal with missing values
@@ -85,48 +84,12 @@ def cleaning():
     return main
 
 
-def correlation_matrix():
-    main = cleaning()
-
-    main.drop(labels=['customer_zip_code_prefix'], axis=1, inplace=True)
-
-    corr = main.corr()
-
-    mask = np.zeros_like(corr, dtype=np.bool)
-    mask[np.triu_indices_from(mask)] = True
-
-    f, ax = plt.subplots(figsize=(15, 11))
-    cmap = sb.diverging_palette(220, 10, as_cmap=True)
-    sb.heatmap(corr, mask=mask, cmap=cmap, vmax=.3, center=0, square=True, linewidths=.5, cbar_kws={"shrink": .5})
-    plt.tight_layout()
-    plt.show()
-
-
-def histogram(column, kde=True):
-    main = cleaning()
-    sb.distplot(main.loc[:, column], kde=kde)
-    plt.show()
-
-
-def scatter_plots(c1, c2):
-    main = cleaning()
-    sb.jointplot(main.loc[:, c1], main.loc[:, c2])
-    plt.show()
-
-
-def box_plots(c1, c2):
-    main = cleaning()
-    sb.boxplot(main.loc[:, c1], main.loc[:, c2])
-    plt.show()
-
-
 if __name__ == "__main__":
-    load_csv_save_binary()
+    data = ['geolocation_olist_public_dataset', 'olist_public_dataset_v2', 'olist_public_dataset_v2_customers',
+            'payments_olist_public_dataset', 'olist_classified_public_dataset',
+            'product_measures_olist_public_dataset_', 'sellers_olist_public_dataset_']
+    # load_csv_save_binary(data)
+    # load_csv_save_binary()
     # load_binary()
     # cleaning()
-    # correlation_matrix()
-    # histogram("order_freight_value")
-    # scatter_plots("order_freight_value", "order_products_value")
-    # histogram("review_score", False)
-    # box_plots("review_score", "review_comment_message")
-    # box_plots("review_score", "delivery_delay")
+    pass
