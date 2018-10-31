@@ -22,9 +22,12 @@ def load_binary(data_names):
     return res
 
 
-def train_test_split(data, train_size=0.8):
+def train_test_split(train_size=0.8):
+    data = pd.read_csv('./CleanedData/dataset.csv')
     msk = np.random.rand(len(data)) < train_size
-    return data[msk], data[~msk]
+    train, test = data[msk], data[~msk]
+    train.to_pickle('./CleanedData/dataset_train.pkl')
+    test.to_pickle('./CleanedData/dataset_test.pkl')
 
 
 def cleaning():
@@ -93,3 +96,4 @@ if __name__ == "__main__":
     # load_binary()
     # cleaning()
     pass
+    # train_test_split()
