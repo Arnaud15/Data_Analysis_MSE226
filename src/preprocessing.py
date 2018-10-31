@@ -47,7 +47,7 @@ def cleaning():
     data_names = ['geolocation_olist_public_dataset', 'olist_public_dataset_v2', 'olist_public_dataset_v2_customers',
                   'payments_olist_public_dataset', 'olist_classified_public_dataset',
                   'product_measures_olist_public_dataset_', 'sellers_olist_public_dataset_']
-    [geo, main, custom, payments, labeled, measures, sellers] = load_binary(data_names)
+    [geo, main, _, _, _, measures, sellers] = load_binary(data_names)
 
     # Get one pair of coordinates for each zip code
     geo = geo.loc[:, ['zip_code_prefix', 'lat', 'lng']].groupby('zip_code_prefix').mean()
@@ -136,11 +136,12 @@ def cleaning():
 
 
 if __name__ == "__main__":
-    data = ['geolocation_olist_public_dataset', 'olist_public_dataset_v2', 'olist_public_dataset_v2_customers',
-            'payments_olist_public_dataset', 'olist_classified_public_dataset',
-            'product_measures_olist_public_dataset_', 'sellers_olist_public_dataset_']
+    # data = ['geolocation_olist_public_dataset', 'olist_public_dataset_v2', 'olist_public_dataset_v2_customers',
+    #         'payments_olist_public_dataset', 'olist_classified_public_dataset',
+    #         'product_measures_olist_public_dataset_', 'sellers_olist_public_dataset_']
     # load_csv_save_binary(data)
     # load_csv_save_binary()
     # load_binary()
     # cleaning()
     # train_test_split()
+    pass

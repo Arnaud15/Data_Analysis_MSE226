@@ -1,4 +1,4 @@
-from preprocessing import load_binary
+from src.preprocessing import load_binary
 
 
 def load_data():
