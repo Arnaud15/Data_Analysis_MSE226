@@ -69,7 +69,7 @@ def cleaning():
     main = main.assign(approval_time=approval_time)
 
     delivery_delay = (
-                main.loc[:, 'order_delivered_customer_date'] - main.loc[:, 'order_estimated_delivery_date']).astype(
+            main.loc[:, 'order_delivered_customer_date'] - main.loc[:, 'order_estimated_delivery_date']).astype(
         'timedelta64[s]')
     main = main.assign(delivery_delay=delivery_delay)
 
