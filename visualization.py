@@ -46,6 +46,7 @@ if __name__ == '__main__':
     # histogram("review_score", False)
     # box_plots("review_score", "review_comment_message")
     # box_plots("review_score", "delivery_delay")
-    histogram('product_photos_qty', False)
-    box_plots("product_photos_qty", "order_products_value")
+    # histogram('product_photos_qty', False)
+    # box_plots("product_photos_qty", "order_products_value")
+    histogram("order_products_value")
     # pass

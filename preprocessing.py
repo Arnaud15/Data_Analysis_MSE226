@@ -30,6 +30,19 @@ def train_test_split(train_size=0.8):
     test.to_pickle('./CleanedData/dataset_test.pkl')
 
 
+def to_buckets_3(array, a, b):
+    new_array = np.zeros(array.shape[0], dtype=int)
+    for i in range(array.shape[0]):
+        x = array[i]
+        if x <= a:
+            new_array[i] = 0
+        elif x < b:
+            new_array[i] = 1
+        else:
+            new_array[i] = 2
+    return new_array
+
+
 def cleaning():
     data_names = ['geolocation_olist_public_dataset', 'olist_public_dataset_v2', 'olist_public_dataset_v2_customers',
                   'payments_olist_public_dataset', 'olist_classified_public_dataset',
@@ -76,13 +89,48 @@ def cleaning():
     columns_to_remove = ['order_status', 'order_purchase_timestamp', 'order_aproved_at',
                          'order_estimated_delivery_date', 'order_delivered_customer_date',
                          'customer_id', 'product_name_lenght', 'review_id', 'review_creation_date',
-                         'review_answer_timestamp', 'product_id']
+                         'review_answer_timestamp']
     main.drop(labels=columns_to_remove, axis=1, inplace=True)
 
     # Modify string covariates
     main.loc[:, 'review_comment_title'] = main.loc[:, 'review_comment_title'].str.len() > 0
     main.loc[:, 'review_comment_message'] = main.loc[:, 'review_comment_message'].str.len()
     main.loc[:, 'review_comment_message'] = main.loc[:, 'review_comment_message'].fillna(0)
+
+    # Get coordinates for each seller
+    sellers = pd.merge(sellers, geo, left_on='seller_zip_code_prefix', right_index=True, how='left', sort=False)
+    sellers.dropna(axis=0, how='any', subset=['lat'], inplace=True)
+    sellers.rename(columns={'lat': 'seller_lat', 'lng': 'seller_lng'}, inplace=True)
+
+    # Merge main with sellers table
+    main.reset_index(level=0, inplace=True)
+    main = pd.merge(main, sellers.loc[:, ['order_id', 'product_id', 'seller_lat', 'seller_lng']],
+                    how='inner', left_on=['order_id', 'product_id'], right_on=['order_id', 'product_id'],
+                    sort=False)
+
+    # Merge main with products' measures table
+    main = pd.merge(main, measures, how='inner', on='product_id', sort=False)
+
+    if main.isnull().values.any():
+        print("Missing values in the main table.")
+    else:
+        print("OK ! No missing values in the main table.")
+
+    # Remove useless covariables
+    columns_to_drop = ['order_id', 'product_id', 'product_category_name', 'product_id',
+                       'customer_city', 'customer_state', 'customer_zip_code_prefix',
+                       'order_sellers_qty']
+    main.drop(labels=columns_to_drop, axis=1, inplace=True)
+
+    # Bucketization of variable 'product_photos_qty'
+    product_photos_col = to_buckets_3(main.loc[:, 'product_photos_qty'].values, 1, 5)
+    main = main.assign(product_photos_qty=product_photos_col)
+
+    # One-hot encoding for categorical variables
+    main = pd.get_dummies(main, columns=['review_score', 'review_comment_title', 'product_photos_qty'],
+                          prefix=['review_score', 'comment_', 'product_photos_qty'])
+
+    main.to_csv('./CleanedData/dataset.csv')
 
     return main
 
@@ -95,5 +143,4 @@ if __name__ == "__main__":
     # load_csv_save_binary()
     # load_binary()
     # cleaning()
-    pass
     # train_test_split()
