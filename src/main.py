@@ -1,6 +1,5 @@
 import pandas as pd
-from src.utils import evaluation_cv
-from src.models import linear_regression
+from models import linear_regression
 from sklearn.model_selection import cross_val_score
 
 
@@ -35,5 +34,5 @@ if __name__ == '__main__':
               "penalty_log": 'l2'}
     X_train, y_train, X_test, y_test = load_data("order_freight_value")
     reg = linear_regression("ols")
-    print(cross_val_score(reg, X_train, y_train, cv=10, scoring='neg_mean_squared_error'))
+    print(sum(cross_val_score(reg, X_train, y_train, cv=10, scoring='neg_mean_squared_error'))/10)
     # pass
