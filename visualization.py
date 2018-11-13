@@ -1,7 +1,6 @@
 import numpy as np
 import seaborn as sb
 import matplotlib.pyplot as plt
-from src.preprocessing import cleaning
 
 
 def correlation_matrix(data):
