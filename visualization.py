@@ -4,12 +4,11 @@ import matplotlib.pyplot as plt
 from preprocessing import cleaning
 
 
-def correlation_matrix():
-    main = cleaning()
+def correlation_matrix(data):
 
-    main.drop(labels=['customer_zip_code_prefix'], axis=1, inplace=True)
+    #data.drop(labels=['customer_zip_code_prefix'], axis=1, inplace=True)
 
-    corr = main.corr()
+    corr = data.corr()
 
     mask = np.zeros_like(corr, dtype=np.bool)
     mask[np.triu_indices_from(mask)] = True
@@ -21,21 +20,18 @@ def correlation_matrix():
     plt.show()
 
 
-def histogram(column, kde=True):
-    main = cleaning()
-    sb.distplot(main.loc[:, column], kde=kde)
+def histogram(data, column, kde=True):
+    sb.distplot(data.loc[:, column], kde=kde)
     plt.show()
 
 
-def scatter_plots(c1, c2):
-    main = cleaning()
-    sb.jointplot(main.loc[:, c1], main.loc[:, c2])
+def scatter_plots(data, c1, c2):
+    sb.jointplot(data.loc[:, c1], data.loc[:, c2])
     plt.show()
 
 
-def box_plots(c1, c2):
-    main = cleaning()
-    sb.boxplot(main.loc[:, c1], main.loc[:, c2])
+def box_plots(data, c1, c2):
+    sb.boxplot(data.loc[:, c1], data.loc[:, c2])
     plt.show()
 
 
