@@ -10,7 +10,3 @@ def linear_regression(type, penalty_log='l2', alpha=0, l1_ratio=0, fit_intercept
     dic["logistic"] = skl.LogisticRegression(penalty=penalty_log, C=alpha, fit_intercept=fit_intercept)
     reg = dic[type]
     return reg
-
-
-
-
