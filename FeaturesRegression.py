@@ -48,11 +48,12 @@ def main():
     powers1 = [('delivery_delay', 2), ('product_weight_g', 2)]
     for feature, power in powers1:
         data = utils.polynomial_feature(data, feature, power)
+    '''
     one_side_interactions_1 = zip(['delivery_delay'] * 4, ['lat', 'lng', 'seller_lat', 'seller_lng'])
     interactions += one_side_interactions_1
     for term1, term2 in interactions:
         data = utils.interaction_terms(data, term1, term2, term1 + '_' + term2)
-
+    '''
     # 2. Feedback features
     data.loc[:, 'review_time'] = np.log(data.loc[:, 'review_time'])
     one_side_interactions_2 = zip(['review_time'] * 6, ['review_comment_message', 'review_score_1',
@@ -78,10 +79,10 @@ def main():
 
     # 5. Speed of processing
     data = utils.interaction_terms(data, 'approval_time', 'delivery_delay', 'approval_time' + '_' + 'delivery_delay')
-    print(data.columns)
+    print(data.info())
 
     # Saving
-    data.to_pickle('./CleanedData/Features1.pkl')
+    data.to_pickle('./CleanedData/Features2.pkl')
     # Try out with features suppression
     return
 

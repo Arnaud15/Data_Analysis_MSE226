@@ -5,6 +5,12 @@ import visualization as vis
 import utils
 import seaborn as sb
 import matplotlib.pyplot as plt
+from sklearn.model_selection import cross_val_score
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import tree
+from sklearn.naive_bayes import GaussianNB
 
 
 def lookup_best_alpha(augmented_data, y):
@@ -79,79 +85,92 @@ def clean():
 
 
 if __name__ == "__main__":
-    # data_clean = pd.read_pickle('./CleanedData/Features1.pkl')
-    # data_clean = data_clean.assign(other=data_clean.target)
+    data_clean = pd.read_pickle('./CleanedData/Features1.pkl')
+    data_clean = data_clean.drop("target", axis=1)
+    data_clean = data_clean.drop("delivery_delay_lat", axis=1)
+    data_clean = data_clean.drop("delivery_delay_lng", axis=1)
+    data_clean = data_clean.drop("delivery_delay_seller_lat", axis=1)
+    data_clean = data_clean.drop("delivery_delay_seller_lng", axis=1)
+    data_clean = data_clean.drop("review_time_review_score_1", axis=1)
+    data_clean = data_clean.drop("review_time_review_score_2", axis=1)
+    data_clean = data_clean.drop("review_time_review_score_3", axis=1)
+    data_clean = data_clean.drop("review_time_review_score_4", axis=1)
+    data_clean = data_clean.drop("review_time_review_score_5", axis=1)
+
     data = pd.read_pickle('./CleanedData/dataset_train.pkl')
     data.drop(columns=['Unnamed: 0'], inplace=True)
-    # Target preprocess
+
     x = data.loc[:, ["review_score_1", "review_score_2", "review_score_3",
                      "review_score_4", "review_score_5"]].stack()
-    review_scores = pd.Series(pd.Categorical(x[x != 0].index.get_level_values(1)))
+    x_clean = data_clean.loc[:, ["review_score_1", "review_score_2", "review_score_3",
+                                 "review_score_4", "review_score_5"]].stack()
+    review = pd.Series(pd.Categorical(x[x != 0].index.get_level_values(1)))
+    review_clean = pd.Series(pd.Categorical(x_clean[x_clean != 0].index.get_level_values(1)))
     target = []
-    for i in range(len(review_scores)):
-        n = review_scores[i][-1]
+    target_clean = []
+    for i in range(len(review)):
+        n = review[i][-1]
         if int(n) >= 4:
             target.append(0)
         else:
             target.append(1)
+    for i in range(len(review_clean)):
+        n = review_clean[i][-1]
+        if int(n) >= 4:
+            target_clean.append(0)
+        else:
+            target_clean.append(1)
+
     data = data.assign(target=target)
-    # data_clean = data_clean.assign(target=target)
+    data_clean = data_clean.assign(target=target_clean)
     data.drop(columns=["review_score_1", "review_score_2", "review_score_3", "review_score_4", "review_score_5"],
               inplace=True)
-    # data_clean.drop(columns=["review_score_1", "review_score_2", "review_score_3", "review_score_4", "review_score_5"],
-    #                 inplace=True)
-    # X_train = (data.drop("target", axis=1)).values
-    # y_train = (data.loc[:, "target"]).values
-    # X_train_c = (data_clean.drop("target", axis=1)).values
-    # y_train_c = (data_clean.loc[:, "target"]).values
-    from sklearn.svm import SVC
-    from sklearn.model_selection import cross_val_score
-    from sklearn.neighbors import KNeighborsClassifier
-    # for n in [15]:
-    #    clf = KNeighborsClassifier(n_neighbors=n)
-    #    clf_c = KNeighborsClassifier(n_neighbors=n)
-    #    print(sum(cross_val_score(clf, X_train, y_train, cv=10, scoring='f1')) / 10)
-    #    print(sum(cross_val_score(clf_c, X_train_c, y_train_c, cv=10, scoring='f1')) / 10)
-    # clf = SVC()
-    # from sklearn.linear_model import LogisticRegression
+    data_clean.drop(columns=["review_score_1", "review_score_2", "review_score_3", "review_score_4", "review_score_5"],
+                    inplace=True)
+
+    X_train_simple = (data.loc[:, ["delivery_delay", "review_comment_message", "order_freight_value", "order_items_qty",
+                                   "lng", "comment__True", "product_weight_g"]]).values
+    y_train_simple = (data.loc[:, "target"]).values
+
+    X_train = (data.drop("target", axis=1)).values
+    y_train = (data.loc[:, "target"]).values
+    X_train_c = (data_clean.drop("target", axis=1)).values
+    y_train_c = (data_clean.loc[:, "target"]).values
+
+    # K = range(1, 51)
+    # F1_NN, F1_NN_clean, F1_NN_simple = [], [], []
+    # for k in K:
+    #     clf = KNeighborsClassifier(n_neighbors=k)
+    #     clf_c = KNeighborsClassifier(n_neighbors=k)
+    #     # F1_NN.append(sum(cross_val_score(clf, X_train, y_train, cv=10, scoring='f1')) / 10)
+    #     F1_NN_clean.append(sum(cross_val_score(clf_c, X_train_c, y_train_c, cv=10, scoring='f1')) / 10)
+    #     # F1_NN_simple.append(sum(cross_val_score(clf_c, X_train_simple, y_train_simple, cv=10, scoring='f1')) / 10)
+    #
+    # plt.figure(0)
+    # plt.plot(K, F1_NN_clean)
+    # plt.show()
+
+    # clf = KNeighborsClassifier(n_neighbors=11)
+    # clf_c = KNeighborsClassifier(n_neighbors=3)
+    # print(sum(cross_val_score(clf, X_train, y_train, cv=10, scoring='f1')) / 10)
+    # print(sum(cross_val_score(clf_c, X_train_c, y_train_c, cv=10, scoring='f1')) / 10)
+    # clf_s = KNeighborsClassifier(n_neighbors=33)
+    # print(sum(cross_val_score(clf_s, X_train_simple, y_train_simple, cv=10, scoring='f1')) / 10)
+    # print(data_clean.info())
+
     # clf = LogisticRegression(penalty='l1', solver='warn', C=1)
-    # clf_c = LogisticRegression(penalty='l1', solver='warn', C=1)
+    clf_c = LogisticRegression(penalty='l1', solver='warn', C=0.1)
+    # clf_s = LogisticRegression(penalty='l1', solver='warn', C=1)
     # print(sum(cross_val_score(clf, X_train, y_train, cv=10, scoring='f1')) / 10)
-    # print(sum(cross_val_score(clf_c, X_train_c, y_train_c, cv=10, scoring='f1')) / 10)
-    # from sklearn import tree
-    # clf = tree.DecisionTreeClassifier()
-    # clf_c = tree.DecisionTreeClassifier()
-    # print(sum(cross_val_score(clf, X_train, y_train, cv=10, scoring='f1')) / 10)
-    # print(sum(cross_val_score(clf_c, X_train_c, y_train_c, cv=10, scoring='f1')) / 10)
-    # from sklearn.naive_bayes import GaussianNB
+    print(sum(cross_val_score(clf_c, X_train_c, y_train_c, cv=10, scoring='f1')) / 10)
+    # print(sum(cross_val_score(clf_s, X_train_simple, y_train_simple, cv=10, scoring='f1')) / 10)
+
+    # print(data.info())
+    # print(data_clean.info())
     # clf = GaussianNB()
     # clf_c = GaussianNB()
+    # clf_s = GaussianNB()
     # print(sum(cross_val_score(clf, X_train, y_train, cv=10, scoring='f1')) / 10)
     # print(sum(cross_val_score(clf_c, X_train_c, y_train_c, cv=10, scoring='f1')) / 10)
-    # from sklearn.neural_network import MLPClassifier
-    # clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(100, 50), random_state = 1)
-    # print(sum(cross_val_score(clf, X_train, y_train, cv=10, scoring='f1')) / 10)
-    # print(sum(cross_val_score(clf_c, X_train_c, y_train_c, cv=10, scoring='f1')) / 10)
-    X_train = (data.loc[:, ["delivery_delay", "review_comment_message", "order_freight_value", "order_items_qty", "lng",
-                            "comment__True", "product_weight_g"]]).values
-    y_train = (data.loc[:, "target"]).values
-    from sklearn.svm import SVC
-    from sklearn.model_selection import cross_val_score
-    from sklearn.neighbors import KNeighborsClassifier
-    # for n in [15]:
-    #     clf = KNeighborsClassifier(n_neighbors=n)
-    #     print(sum(cross_val_score(clf, X_train, y_train, cv=10, scoring='f1')) / 10)
-    clf = SVC()
-    from sklearn.linear_model import LogisticRegression
-    # clf = LogisticRegression(penalty='l1', solver='warn', C=1)
-    # print(sum(cross_val_score(clf, X_train, y_train, cv=10, scoring='f1')) / 10)
-    # from sklearn import tree
-    # clf = tree.DecisionTreeClassifier()
-    # print(sum(cross_val_score(clf, X_train, y_train, cv=10, scoring='f1')) / 10)
-    # from sklearn.naive_bayes import GaussianNB
-    # clf = GaussianNB()
-    print(sum(cross_val_score(clf, X_train, y_train, cv=10, scoring='f1')) / 10)
-    # from sklearn.neural_network import MLPClassifier
-    # clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(100, 50), random_state = 1)
-    # print(sum(cross_val_score(clf, X_train, y_train, cv=10, scoring='f1')) / 10)
-    # print(sum(cross_val_score(clf_c, X_train_c, y_train_c, cv=10, scoring='f1')) / 10)
+    # print(sum(cross_val_score(clf_s, X_train_simple, y_train_simple, cv=10, scoring='f1')) / 10)
+    #
