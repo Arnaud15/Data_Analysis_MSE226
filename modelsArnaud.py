@@ -102,45 +102,46 @@ def main(args):
             'verbose': 0
         }
 
-	print('Starting training...')
-	# train
-	gbm = lgb.train(params,
-			lgb_train,
-			num_boost_round=10000,
-			valid_sets=lgb_eval,
-			early_stopping_rounds=20)
-	print('Saving model...')
-	# save model to file
-	gbm.save_model('./savedModels/model.txt')
+    print('Starting training...')
+    # train
+    gbm = lgb.train(params,
+            lgb_train,
+            num_boost_round=10000,
+            valid_sets=lgb_eval,
+            early_stopping_rounds=20)
+    print('Saving model...')
+    # save model to file
+    gbm.save_model('./savedModels/model.txt')
 
-	print('Starting predicting...')
-	# predict
-	y_pred = np.exp(gbm.predict(X_test, num_iteration=gbm.best_iteration))
-	elif args.model == 'LinearRegression':
-		model = models.ols(X_train, log_y_train)
-		y_pred = np.exp(model.predict(X_test))
-	elif args.model == 'RidgeRegression':
-		pass
-	elif args.model == 'NearestNeighbors':
-		pass
-	elif args.model == 'BaseLineFull':
-		original_data = pd.read_pickle('./CleanedData/dataset_train.pkl')
-		original_data.drop(columns=['Unnamed: 0'], inplace=True)
-		original_data = original_data.assign(target= original_data.order_products_value / original_data.order_items_qty)
-		original_data = original_data.assign(log_target= np.log(original_data.target))
-		original_data.drop(columns=['order_products_value', 'order_items_qty'], inplace=True)
-	else:
-		raise Exception('Model asked for has not been implemented')
+    print('Starting predicting...')
+    # predict
+    y_pred = np.exp(gbm.predict(X_test, num_iteration=gbm.best_iteration))
+    elif args.model == 'LinearRegression':
+        model = models.ols(X_train, log_y_train)
+        y_pred = np.exp(model.predict(X_test))
+    elif args.model == 'RidgeRegression':
+        pass
+    elif args.model == 'NearestNeighbors':
+        pass
+    elif args.model == 'BaseLineFull':
+        original_data = pd.read_pickle('./CleanedData/dataset_train.pkl')
+        original_data.drop(columns=['Unnamed: 0'], inplace=True)
+        original_data = original_data.assign(target= original_data.order_products_value / original_data.order_items_qty)
+        original_data = original_data.assign(log_target= np.log(original_data.target))
+        original_data.drop(columns=['order_products_value', 'order_items_qty'], inplace=True)
+    else:
+        raise Exception('Model asked for has not been implemented')
 
-	# eval
-	print('The rmse of prediction is:', mean_squared_error(y_test, y_pred) ** 0.5)
-	return
+    # eval
+    print('The rmse of prediction is:', mean_squared_error(y_test, y_pred) ** 0.5)
+    return
+
 
 if __name__=="__main__":
-	parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-	parser.add_argument('--model',  type=str, default='LightGBM', help="ModelToSelect")
-	args = parser.parse_args()
-	main(args)
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--model',  type=str, default='LightGBM', help="ModelToSelect")
+    args = parser.parse_args()
+    main(args)
 
 
         print('Starting predicting...')

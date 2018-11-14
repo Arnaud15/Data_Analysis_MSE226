@@ -31,7 +31,7 @@ def prune_features(features_to_drop, original_data):
     return original_data
 
 
-def main():
+def clean():
     # Data Import
     data = pd.read_pickle('./CleanedData/dataset_train.pkl')
     # Data Preprocessing
@@ -55,7 +55,7 @@ def main():
 
     # 2. Feedback features
     data.loc[:, 'review_time'] = np.log(data.loc[:, 'review_time'])
-    one_side_interactions_2 = zip(['review_time'] * 6, ['review_comment_message', 'review_score_1',
+    one_side_interactions_2 = zip(['review_time'] * 6, ['review_comment_message', 'review_score_1', \
                                                         'review_score_2', 'review_score_3', 'review_score_4',
                                                         'review_score_5'])
     for term1, term2 in one_side_interactions_2:
@@ -87,4 +87,19 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # Data Import
+    data = pd.read_pickle('./CleanedData/dataset_train.pkl')
+    data.drop(columns=['Unnamed: 0'], inplace=True)
+    # Target preprocess
+    x = data.loc[:, ["review_score_1", "review_score_2", "review_score_3",
+                     "review_score_4", "review_score_5"]].stack()
+    review_scores = pd.Series(pd.Categorical(x[x != 0].index.get_level_values(1)))
+    target = []
+    for i in range(len(review_scores)):
+        n = review_scores[i][-1]
+        target.append(int(n))
+    data = data.assign(target=target)
+    data.drop(columns=["review_score_1", "review_score_2", "review_score_3", "review_score_4", "review_score_5"],
+              inplace=True)
+
+
