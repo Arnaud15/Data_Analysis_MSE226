@@ -15,6 +15,7 @@ import visualization
 
 def main(args):
     data = pd.read_pickle('./CleanedData/' + args.dataset + '.pkl')
+    print(data.shape)
     if args.dataset == 'dataset_train':
         # Data Preprocessing
         data.drop(columns=['Unnamed: 0'], inplace=True)

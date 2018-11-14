@@ -1,9 +1,7 @@
-import sklearn as sk
 import lightgbm as lgb
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import cross_val_score
 from sklearn import neighbors
 import argparse
@@ -20,16 +18,15 @@ def main(args):
         data = data.assign(log_target=np.log(data.target))
         data.drop(columns=['order_products_value', 'order_items_qty'], inplace=True)
 
-    X_train = data.drop(['log_target', 'target'], axis=1).values
-    log_y_train = data.loc[:, 'log_target'].values
+    X_train = data.drop(['target'], axis=1).values
     y_train = data.loc[:, 'target'].values
 
     if args.model == 'LightGBM':
-        lgb_train = lgb.Dataset(X_train, log_y_train)
+        lgb_train = lgb.Dataset(X_train, y_train)
         params = {
             'boosting_type': 'gbdt',
-            'objective': 'regression',
-            'metric': {'rmse'},
+            'objective': 'classification',
+            'metric': {'f1'},
             'num_leaves': 31,
             'learning_rate': 0.05,
             'feature_fraction': 0.9,
@@ -50,17 +47,17 @@ def main(args):
         print('CV Score with LightGBM:' + str(cv_results['rmse-mean'][-1]))
     elif args.model == 'LinearRegression':
         model = models.linear_regression('ols')
-        print(- sum(cross_val_score(model, X_train, log_y_train, cv=10, scoring='neg_mean_squared_error')) / 10)
+        print(- sum(cross_val_score(model, X_train, y_train, cv=10, scoring='neg_mean_squared_error')) / 10)
     elif args.model == 'NearestNeighbors':
         scores = []
         for k_value in tqdm(range(5, 100, 5)):
             model = neighbors.KNeighborsRegressor(n_neighbors=k_value, weights='uniform')
             scores.append(
-                - sum(cross_val_score(model, X_train, log_y_train, cv=10, scoring='neg_mean_squared_error')) / 10)
+                - sum(cross_val_score(model, X_train, y_train, cv=10, scoring='neg_mean_squared_error')) / 10)
         plt.figure(1)
         plt.plot(range(5, 100, 5), scores)
         plt.xlabel("k")
-        plt.ylabel("RMSE")
+        plt.ylabel("f1")
         plt.savefig('./Saved_Plots/NNplotRegression.png')
         plt.close()
     else:
