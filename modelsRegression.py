@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 
 def main(args):
-    data = pd.read_pickle('./CleanedData/args.dataset.pkl')
+    data = pd.read_pickle('./CleanedData/' + args.dataset + '.pkl')
     if args.dataset == 'BaseFeatures':
         # Data Preprocessing
         data.drop(columns=['Unnamed: 0'], inplace=True)
@@ -62,11 +62,10 @@ def main(args):
         plt.ylabel("RMSE")
         plt.savefig('./Saved_Plots/NNplotRegression.png')
         plt.close()
+    elif args.model == 'BaselineMean':
+        print(np.mean((log_y_train - log_y_train.mean()) ** 2) ** 0.5)
     else:
         raise Exception('Model asked for has not been implemented')
-
-    # eval
-    #print('The rmse of prediction is:', mean_squared_error(y_test, y_pred) ** 0.5)
     return
 
 if __name__ == "__main__":
