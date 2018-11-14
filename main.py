@@ -4,14 +4,14 @@ from sklearn.model_selection import cross_val_score
 
 
 def load_data(target):
-    train_data = pd.read_pickle("../CleanedData/dataset_train.pkl")
-    test_data = pd.read_pickle("../CleanedData/dataset_test.pkl")
+    train_data = pd.read_pickle("./CleanedData/dataset_train.pkl")
+    test_data = pd.read_pickle("./CleanedData/dataset_test.pkl")
     X_train = (train_data.drop(target, axis=1)).values
     y_train = (train_data.loc[:, target]).values
-    #y_train = y_train.reshape(len(y_train), 1)
+    # y_train = y_train.reshape(len(y_train), 1)
     X_test = (test_data.drop(target, axis=1)).values
     y_test = (test_data.loc[:, target]).values
-    #y_test = y_test.reshape(len(y_test), 1)
+    # y_test = y_test.reshape(len(y_test), 1)
     print(X_train.shape, y_train.shape, type(X_train), type(y_train))
     return X_train, y_train, X_test, y_test
 
@@ -34,5 +34,7 @@ if __name__ == '__main__':
               "penalty_log": 'l2'}
     X_train, y_train, X_test, y_test = load_data("order_freight_value")
     reg = linear_regression("ols")
+    log_reg = linear_regression("logistic")
     print(sum(cross_val_score(reg, X_train, y_train, cv=10, scoring='neg_mean_squared_error'))/10)
+    # print(sum(cross_val_score(log_reg, X_train, y_train, cv=10, scoring='neg_mean_squared_error')) / 10)
     # pass
