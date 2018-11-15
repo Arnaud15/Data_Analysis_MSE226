@@ -34,7 +34,6 @@ def prune_features(features_to_drop, original_data):
 def main():
     # Data Import
     data = pd.read_pickle('./CleanedData/dataset_train.pkl')
-    print(data.shape)
     # Data Preprocessing
     data.drop(columns=['Unnamed: 0'], inplace=True)
     data = data.assign(target=data.order_products_value / data.order_items_qty)
@@ -82,7 +81,6 @@ def main():
     data = utils.interaction_terms(data, 'approval_time', 'delivery_delay', 'approval_time' + '_' + 'delivery_delay')
 
     # Saving
-    print(data.shape)
     data.to_pickle('./CleanedData/Features1.pkl')
     # Try out with features suppression
     return
