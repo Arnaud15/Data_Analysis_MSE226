@@ -11,6 +11,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import tree
 from sklearn.naive_bayes import GaussianNB
+from sklearn import preprocessing
 
 
 def lookup_best_alpha(augmented_data, y):
@@ -79,7 +80,7 @@ def clean():
     print(data.columns)
 
     # Saving
-    data.to_pickle('./CleanedData/Features1.pkl')
+    data.to_pickle('./CleanedData/FeaturesClassification.pkl')
     # Try out with features suppression
     return
 
@@ -87,10 +88,6 @@ def clean():
 if __name__ == "__main__":
     data_clean = pd.read_pickle('./CleanedData/Features1.pkl')
     data_clean = data_clean.drop("target", axis=1)
-    data_clean = data_clean.drop("delivery_delay_lat", axis=1)
-    data_clean = data_clean.drop("delivery_delay_lng", axis=1)
-    data_clean = data_clean.drop("delivery_delay_seller_lat", axis=1)
-    data_clean = data_clean.drop("delivery_delay_seller_lng", axis=1)
     data_clean = data_clean.drop("review_time_review_score_1", axis=1)
     data_clean = data_clean.drop("review_time_review_score_2", axis=1)
     data_clean = data_clean.drop("review_time_review_score_3", axis=1)
@@ -137,6 +134,10 @@ if __name__ == "__main__":
     X_train_c = (data_clean.drop("target", axis=1)).values
     y_train_c = (data_clean.loc[:, "target"]).values
 
+    min_max_scaler = preprocessing.MinMaxScaler()
+    X_train_c = min_max_scaler.fit_transform(X_train_c)
+    X_train_c = preprocessing.scale(X_train_c)
+
     # K = range(1, 51)
     # F1_NN, F1_NN_clean, F1_NN_simple = [], [], []
     # for k in K:
@@ -158,11 +159,13 @@ if __name__ == "__main__":
     # print(sum(cross_val_score(clf_s, X_train_simple, y_train_simple, cv=10, scoring='f1')) / 10)
     # print(data_clean.info())
 
-    # clf = LogisticRegression(penalty='l1', solver='warn', C=1)
-    clf_c = LogisticRegression(penalty='l1', solver='warn', C=0.1)
+    # clf = LogisticRegression(penalty='l1', solver='liblinear', C=1, max_iter=100000)
+    for c in [0.01, 0.1, 1, 10, 100]:
+        clf_c = LogisticRegression(penalty='l1', solver='saga', C=0.1, max_iter=1000)
     # clf_s = LogisticRegression(penalty='l1', solver='warn', C=1)
     # print(sum(cross_val_score(clf, X_train, y_train, cv=10, scoring='f1')) / 10)
-    print(sum(cross_val_score(clf_c, X_train_c, y_train_c, cv=10, scoring='f1')) / 10)
+        print(str(c))
+        print(sum(cross_val_score(clf_c, X_train_c, y_train_c, cv=10, scoring='f1')) / 10)
     # print(sum(cross_val_score(clf_s, X_train_simple, y_train_simple, cv=10, scoring='f1')) / 10)
 
     # print(data.info())
