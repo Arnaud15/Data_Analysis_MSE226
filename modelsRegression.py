@@ -15,7 +15,6 @@ import visualization
 
 def main(args):
     data = pd.read_pickle('./CleanedData/' + args.dataset + '.pkl')
-    print(data.shape)
     if args.dataset == 'dataset_train':
         # Data Preprocessing
         data.drop(columns=['Unnamed: 0'], inplace=True)
@@ -25,7 +24,6 @@ def main(args):
     X_train = data.drop(['log_target', 'target'], axis=1).values
     log_y_train = data.loc[:, 'log_target'].values
     y_train = data.loc[:, 'target'].values
-    print(X_train.shape)
     if args.model == 'LightGBM':
         lgb_train = lgb.Dataset(X_train, log_y_train)
         params = {

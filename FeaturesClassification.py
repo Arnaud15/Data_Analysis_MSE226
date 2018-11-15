@@ -79,7 +79,7 @@ def clean():
     print(data.columns)
 
     # Saving
-    data.to_pickle('./CleanedData/Features1.pkl')
+    data.to_pickle('./CleanedData/FeaturesClassification.pkl')
     # Try out with features suppression
     return
 
