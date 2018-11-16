@@ -153,27 +153,26 @@ if __name__ == "__main__":
 
     # clf = KNeighborsClassifier(n_neighbors=11)
     # clf_c = KNeighborsClassifier(n_neighbors=3)
-    # print(sum(cross_val_score(clf, X_train, y_train, cv=10, scoring='f1')) / 10)
-    # print(sum(cross_val_score(clf_c, X_train_c, y_train_c, cv=10, scoring='f1')) / 10)
+    # print(sum(cross_val_score(clf, X_train, y_train, cv=10, scoring='roc_auc')) / 10)
+    # print(sum(cross_val_score(clf_c, X_train_c, y_train_c, cv=10, scoring='roc_auc')) / 10)
     # clf_s = KNeighborsClassifier(n_neighbors=33)
-    # print(sum(cross_val_score(clf_s, X_train_simple, y_train_simple, cv=10, scoring='f1')) / 10)
+    # print(sum(cross_val_score(clf_s, X_train_simple, y_train_simple, cv=10, scoring='roc_auc')) / 10)
     # print(data_clean.info())
 
     # clf = LogisticRegression(penalty='l1', solver='liblinear', C=1, max_iter=100000)
-    for c in [0.01, 0.1, 1, 10, 100]:
-        clf_c = LogisticRegression(penalty='l1', solver='saga', C=0.1, max_iter=1000)
+    # for c in [0.01, 0.1, 1, 10, 100, 1000]:
+    #     clf_c = LogisticRegression(penalty='l1', solver='saga', C=c, max_iter=1000)
     # clf_s = LogisticRegression(penalty='l1', solver='warn', C=1)
-    # print(sum(cross_val_score(clf, X_train, y_train, cv=10, scoring='f1')) / 10)
-        print(str(c))
-        print(sum(cross_val_score(clf_c, X_train_c, y_train_c, cv=10, scoring='f1')) / 10)
-    # print(sum(cross_val_score(clf_s, X_train_simple, y_train_simple, cv=10, scoring='f1')) / 10)
+    # print(sum(cross_val_score(clf, X_train, y_train, cv=10, scoring='roc_auc')) / 10)
+    #     print(sum(cross_val_score(clf_c, X_train_c, y_train_c, cv=10, scoring='roc_auc')) / 10)
+    # print(sum(cross_val_score(clf_s, X_train_simple, y_train_simple, cv=10, scoring='roc_auc')) / 10)
 
     # print(data.info())
     # print(data_clean.info())
     # clf = GaussianNB()
     # clf_c = GaussianNB()
     # clf_s = GaussianNB()
-    # print(sum(cross_val_score(clf, X_train, y_train, cv=10, scoring='f1')) / 10)
-    # print(sum(cross_val_score(clf_c, X_train_c, y_train_c, cv=10, scoring='f1')) / 10)
-    # print(sum(cross_val_score(clf_s, X_train_simple, y_train_simple, cv=10, scoring='f1')) / 10)
+    # print(sum(cross_val_score(clf, X_train, y_train, cv=10, scoring='roc_auc')) / 10)
+    # print(sum(cross_val_score(clf_c, X_train_c, y_train_c, cv=10, scoring='roc_auc')) / 10)
+    # print(sum(cross_val_score(clf_s, X_train_simple, y_train_simple, cv=10, scoring='roc_auc')) / 10)
     #
