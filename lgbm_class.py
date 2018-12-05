@@ -10,61 +10,38 @@ from tqdm import tqdm
 
 
 def main(args):
-    data = pd.read_pickle('./CleanedData/args.dataset.pkl')
-    if args.dataset == 'BaseFeatures':
-        # Data Preprocessing
-        data.drop(columns=['Unnamed: 0'], inplace=True)
-        data = data.assign(target=data.order_products_value / data.order_items_qty)
-        data = data.assign(log_target=np.log(data.target))
-        data.drop(columns=['order_products_value', 'order_items_qty'], inplace=True)
-
-    X_train = data.drop(['target'], axis=1).values
-    y_train = data.loc[:, 'target'].values
+    data = pd.read_pickle('./CleanedData/Features2.pkl')
+    X = data.drop(['target'], axis=1).values
+    Y = data.loc[:, 'target'].values
+    sampled_rows = np.random.rand(X.shape[0]) < 0.9
+    X_train = X[sampled_rows]
+    X_test = X[~sampled_rows]
+    Y_train = Y[sampled_rows]
+    Y_test = Y[~sampled_rows]
 
     if args.model == 'LightGBM':
-        lgb_train = lgb.Dataset(X_train, y_train)
+        lgb_train = lgb.Dataset(X_train, Y_train)
+        lgb_eval = lgb.Dataset(X_test, Y_test, reference=lgb_train)
         params = {
-            'boosting_type': 'gbdt',
-            'objective': 'classification',
-            'metric': {'f1'},
-            'num_leaves': 31,
-            'learning_rate': 0.05,
-            'feature_fraction': 0.9,
-            'bagging_fraction': 0.8,
-            'bagging_freq': 5,
-            'verbose': 0
+        'boosting_type': 'gbdt',
+        'objective': 'binary',
+        'metric': {'auc'},
+        'num_leaves': 31,
+        'learning_rate': 0.05,
+        'feature_fraction': 0.9,
+        'bagging_fraction': 0.8,
+        'bagging_freq': 5,
+        'verbose': 0
         }
         print('Starting training...')
-        cv_results = lgb.cv(
-            params,
-            lgb_train,
-            num_boost_round=10000,
-            nfold=10,
-            early_stopping_rounds=10,
-            stratified=False,
-            verbose_eval=100
-        )
-        print('CV Score with LightGBM:' + str(cv_results['rmse-mean'][-1]))
-    elif args.model == 'LinearRegression':
-        model = models.linear_regression('ols')
-        print(- sum(cross_val_score(model, X_train, y_train, cv=10, scoring='neg_mean_squared_error')) / 10)
-    elif args.model == 'NearestNeighbors':
-        scores = []
-        for k_value in tqdm(range(5, 100, 5)):
-            model = neighbors.KNeighborsRegressor(n_neighbors=k_value, weights='uniform')
-            scores.append(
-                - sum(cross_val_score(model, X_train, y_train, cv=10, scoring='neg_mean_squared_error')) / 10)
-        plt.figure(1)
-        plt.plot(range(5, 100, 5), scores)
-        plt.xlabel("k")
-        plt.ylabel("f1")
-        plt.savefig('./Saved_Plots/NNplotRegression.png')
-        plt.close()
-    else:
-        raise Exception('Model asked for has not been implemented')
-
-    # eval
-    # print('The rmse of prediction is:', mean_squared_error(y_test, y_pred) ** 0.5)
+        gbm = lgb.train(params,
+                lgb_train,
+                num_boost_round=10000,
+                valid_sets=lgb_eval,
+                early_stopping_rounds=10)
+        print('Saving model...')
+        # save model to file
+        gbm.save_model('./savedModels/bestClassificationModel.txt')
     return
 
 
