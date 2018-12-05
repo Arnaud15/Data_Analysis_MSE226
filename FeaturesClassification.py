@@ -86,7 +86,8 @@ def clean():
 
 
 if __name__ == "__main__":
-    data_clean = pd.read_pickle('./CleanedData/Features1_test.pkl')
+    data_clean = pd.read_pickle('./CleanedData/Features1.pkl')
+    data_clean.drop(columns=["target"], inplace=True)
     data_clean = data_clean.drop("review_time_review_score_1", axis=1)
     data_clean = data_clean.drop("review_time_review_score_2", axis=1)
     data_clean = data_clean.drop("review_time_review_score_3", axis=1)
@@ -123,7 +124,7 @@ if __name__ == "__main__":
               inplace=True)
     data_clean.drop(columns=["review_score_1", "review_score_2", "review_score_3", "review_score_4", "review_score_5"],
                     inplace=True)
-    data_clean.to_pickle("Features2_test.pkl")
+    data_clean.to_pickle("Features2.pkl")
 
     X_train_simple = (data.loc[:, ["delivery_delay", "review_comment_message", "order_freight_value", "order_items_qty",
                                    "lng", "comment__True", "product_weight_g"]]).values
