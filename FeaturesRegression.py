@@ -33,11 +33,12 @@ def prune_features(features_to_drop, original_data):
 
 def main():
     # Data Import
-    data = pd.read_pickle('./CleanedData/dataset_test.pkl')
+    data = pd.read_pickle('./CleanedData/dataset_train.pkl')
     # Data Preprocessing
     data.drop(columns=['Unnamed: 0'], inplace=True)
     data = data.assign(target=data.order_products_value / data.order_items_qty)
     data = data.assign(log_target=np.log(data.target))
+    data.drop(columns=['target'], inplace=True)
     data.drop(columns=['order_products_value', 'order_items_qty'], inplace=True)
 
     # 1. Localization features
@@ -81,7 +82,7 @@ def main():
     data = utils.interaction_terms(data, 'approval_time', 'delivery_delay', 'approval_time' + '_' + 'delivery_delay')
 
     # Saving
-    data.to_csv('./CleanedData/Features1_test.csv')
+    data.to_csv('./CleanedData/Features1_train.csv')
     # Try out with features suppression
     return
 
